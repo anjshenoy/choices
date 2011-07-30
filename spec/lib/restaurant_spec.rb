@@ -31,5 +31,8 @@ describe Restaurant do
     it "can take on more value items" do
       r.add_items(2.25, :burger, :fries).value_items.should == [{[:burger, :fries] => 2.25}]
     end
+    it "can take on more value items" do
+      lambda{r.add_items(2.25)}.should raise_error(ArgumentError, "Data Error:: Item required in order to proceed")
+    end
   end
 end

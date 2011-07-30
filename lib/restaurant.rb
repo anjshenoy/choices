@@ -4,15 +4,7 @@ class Restaurant
 
   def initialize(id, price, *items)
     @id, @single_items, @value_items = id, [], []
-    if items.size == 1
-      @single_items << {items.first => price}
-    else
-      @value_items << {items => price}
-    end
-
-    if items.empty?
-      raise ArgumentError.new("Data Error:: Item required in order to proceed")
-    end
+    add_items(price, *items)
   end
 
 
@@ -22,8 +14,10 @@ class Restaurant
     else
       @value_items << {items => price}
     end
+    if items.empty?
+      raise ArgumentError.new("Data Error:: Item required in order to proceed")
+    end
     self
   end
 
-  
 end
