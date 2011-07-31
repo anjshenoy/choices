@@ -63,8 +63,24 @@ describe Restaurant do
 
   context "price calculation algorithm" do
     it "first checks if it has the item" do
-      r.should_receive(:has_item?).with(:fries).exactly(:once)
+      r.should_receive(:has_items?).with(:fries).exactly(:once)
       r.price_for(:fries)
+    end
+
+    context "if the item does exist in its menu" do
+      it "looks for the item in its list of single items and returns the price if found" do
+        r.price_for(:fries).should == {:fries => 1.75}
+      end
+
+      it "looks for the item in its list of value items and returns the price if found"do
+        r.add_items(3.50, :burger, :fries)
+        r.price_for(:burger).should == {[:burger, :fries] => 3.50}
+      end
+
+      it "returns both the single item and value item combo with the prices for each if it matches against both" do
+        r.add_items(3.50, :burger, :fries)
+        r.price_for(:fries).should == {[:burger, :fries] => 3.50, :fries => 1.75}
+      end
     end
   end
 

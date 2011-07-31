@@ -34,6 +34,13 @@ class Restaurant
   end
 
   def price_for(item)
-    has_item?(item)
+    result = {}
+    if has_items?(item)
+      result[item] = @single_items[item] if @single_items.has_key?(item)
+      @value_items.each_pair do |value_combo, price|
+        result[value_combo] = price if value_combo.include?(item)
+      end
+    end
+    result
   end
 end
