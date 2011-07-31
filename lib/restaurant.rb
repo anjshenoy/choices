@@ -12,23 +12,18 @@ class Restaurant
     if items.size == 1
       @single_items[items.first] = price
     else
-      @value_items[items] = price
+      @value_items[items.sort.join("_")] = price
     end
     if items.empty?
       raise ArgumentError.new("Data Error:: Item required in order to proceed")
     end
   end
 
-  def all_items
-    (@single_items.keys + @value_items.keys.flatten).uniq.inject({}){|result, key|
-      result[key] = nil
-      result
-    }
-  end
-
   def has_items?(*items)
     items.each do |item|
-      return false unless all_items.has_key?(item)
+      unless @single_items.has_key?(item) || has_item_in_value_items?(item)
+        return false
+      end
     end
     true
   end
@@ -51,5 +46,13 @@ class Restaurant
     else
       price_result
     end
+  end
+
+  private
+  def has_item_in_value_items?(item)
+    @value_items.each do |key, value|
+      return true if key.include? item
+    end
+    false
   end
 end
