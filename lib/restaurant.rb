@@ -33,7 +33,7 @@ class Restaurant
     true
   end
 
-  def price_for(*items)
+  def price_combinations(*items)
     price_result = {}
     (1..items.length).inject([]){|result, size|
       items.combination(size).each {|combo| result << combo} 
@@ -49,7 +49,7 @@ class Restaurant
     if price_result.empty?
       nil
     else
-      price_result.sort{|a,b| a.last <=> b.last}.first.last
+      price_result
     end
   end
 end

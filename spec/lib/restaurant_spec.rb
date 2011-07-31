@@ -65,28 +65,39 @@ describe Restaurant do
 
     it "first checks if it has the item" do
       r.should_receive(:has_items?).with(:fries).exactly(:once).and_return(true)
-      r.price_for(:fries)
+      r.price_combinations(:fries)
     end
 
     context "if the item does exist in its menu" do
       it "looks for the item in its list of single items and returns the price if found" do
-        r.price_for(:fries).should == 1.75
+        r.price_combinations(:fries).should == {:fries=>1.75}
       end
 
       it "looks for the item in its list of value items and returns the price if found"do
         r.add_items(3.50, :burger, :fries)
-        r.price_for(:burger).should == 3.50
+        r.price_combinations(:burger).should == {[:burger, :fries]=>3.5}
       end
 
       it "returns both the single item and value item combo with the prices for each if it matches against both" do
         r.add_items(3.50, :burger, :fries)
-        r.price_for(:fries).should == 1.75
+        r.price_combinations(:fries).should == {:fries=>1.75, [:burger, :fries]=>3.5}
       end
     end
     it "returns nil if the item does not exist" do
-      r.price_for(:boo).should be_nil
+      r.price_combinations(:boo).should be_nil
     end
 
+    context "for multiple items" do
+      it "returns the total price by doing a greedy combination match" do
+        r.add_items(3.50, :burger, :fries)
+        r.price_combinations(:burger, :fries).should == {[:burger, :fries]=>3.5, :fries=>1.75}
+      end
+
+      it "returns the sum of the prices for each item" do
+        r.add_items(2.50, :burger)
+        r.price_combinations(:burger, :fries).should == {:burger=>2.5, :fries=>1.75}
+      end
+    end
   end
 
 end
