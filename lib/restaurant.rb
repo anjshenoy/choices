@@ -20,10 +20,20 @@ class Restaurant
   end
 
   def all_items
-    (@single_items.keys + @value_items.keys.flatten).uniq
+    (@single_items.keys + @value_items.keys.flatten).uniq.inject({}){|result, key|
+      result[key] = nil
+      result
+    }
   end
 
-  def has_item?(item)
-    all_items.include?(item)
+  def has_items?(*items)
+    items.each do |item|
+      return false unless all_items.has_key?(item)
+    end
+    true
+  end
+
+  def price_for(item)
+    has_item?(item)
   end
 end

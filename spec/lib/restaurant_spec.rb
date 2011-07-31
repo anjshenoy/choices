@@ -2,6 +2,7 @@ require File.dirname(__FILE__) + "/../../lib/restaurant.rb"
 
 describe Restaurant do
 
+  let(:r) {Restaurant.new(1, 1.75, :fries)}
   context "initialization" do
     it "has an ID" do
       Restaurant.new(1, nil, nil).id.should == 1
@@ -43,16 +44,28 @@ describe Restaurant do
   end
 
   it "generates a list of every single unique item on the menu with no prices" do
-    r = Restaurant.new(1, 1.75, :fries)
     r.add_items(2.00, :burger)
     r.add_items(3.50, :burger, :fries)
     r.add_items(1.00, :drink)
     r.add_items(5.00, :fajitas, :drink, :fries)
-    r.all_items.should == [:fries, :burger, :drink, :fajitas]
+    r.all_items.should == {:fries => nil, :burger =>nil, :drink => nil, :fajitas => nil}
   end
 
-  it "returns true if it has a particular item" do
-    r = Restaurant.new(1, 2.00, :fries)
-    r.has_item?(:fries).should be_true
+  context "item check" do
+    it "returns true if it has a particular item" do
+      r.has_items?(:fries).should be_true
+    end
+
+    it "returns true only if all supplied items exist in its menu" do
+      r.has_items?(:fries, :burger, :boo).should be_false
+    end
   end
+
+  context "price calculation algorithm" do
+    it "first checks if it has the item" do
+      r.should_receive(:has_item?).with(:fries).exactly(:once)
+      r.price_for(:fries)
+    end
+  end
+
 end
