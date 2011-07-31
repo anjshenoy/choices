@@ -125,4 +125,50 @@ describe Restaurant do
     end
   end
 
+
+  context "price calculator" do
+
+    it "returns nil if the item is not in the menu" do
+      r.price("boo").should be_nil
+    end
+
+    context "for single items" do
+      it "finds the price for a single item" do
+        r.price("fries").should == 1.75
+      end
+
+      it "returns the total price if a combination of single items is provided" do
+        r.add_items(3.00, "burger")
+        r.price("fries", "burger").should == 4.75
+      end
+    end
+
+    context "for value items" do
+      before(:each) do
+        r.add_items(4.00, "burger", "fries")
+        r.add_items(5.00, "burger", "fries", "shake")
+      end
+
+      it "finds the price for a single value item" do
+        r.price("fries", "burger").should == 4.00
+      end
+
+      it "returns the total price if a combination of value items is provided" do
+        r.add_items(3.00, "burger")
+        r.price("fries", "burger", "shake").should == 5.00
+      end
+    end
+
+    context "for single/value items in combination" do
+      before(:each) do
+        r.add_items(1.00, "drink")
+        r.add_items(4.00, "burger", "fries")
+        r.add_items(5.00, "burger", "fries", "shake")
+      end
+
+      it "returns the sum of each item found, with a preference for combination items" do
+        r.price("burger", "fries", "drink").should == 5.00
+      end
+    end
+  end
 end

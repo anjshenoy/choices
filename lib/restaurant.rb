@@ -19,6 +19,7 @@ class Restaurant
     end
   end
 
+  #TODO: remove this if its not being used
   def has_items?(*items)
     items.each do |item|
       unless @single_items.has_key?(item) || has_item_in_value_items?(item)
@@ -37,24 +38,23 @@ class Restaurant
     }).merge(@value_items)
   end
 
-  def price_combinations(*items)
-    price_result = {}
-    (1..items.length).inject([]){|result, size|
-      items.combination(size).each {|combo| result << combo} 
+  def price(*items)
+    items.sort!
+    item_combinations = items.size.downto(1).inject([]){|result, size|
+      items.combination(size).each{|item_combo| result << item_combo}
       result
-    }.each do |items|
-      if has_items?(*items)
-        price_result[items.first] = @single_items[items.first] if items.size == 1 && @single_items.has_key?(items.first)
-        @value_items.each_pair do |value_combo, price|
-          price_result[value_combo] = price if value_combo.join(", ").include?(items.join(","))
-        end
+    }.map{|i| i.join("_")}
+    valid_price_combos = item_combinations.inject({}) do |result, item_combo|
+      if all_price_combinations.has_key?(item_combo)
+        result[item_combo] = all_price_combinations[item_combo]
       end
+      result
     end
-    if price_result.empty?
-      nil
-    else
-      price_result
-    end
+    valid_price_combos.inject({}){|result, array|
+      key, value = array
+      result[key] = valid_price_combos[key] if (result.keys.map{|k| k.split("_")}.flatten & key.split("_")).empty?
+      result
+    }.values.inject(&:+)
   end
 
   private
