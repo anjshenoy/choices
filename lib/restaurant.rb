@@ -19,7 +19,6 @@ class Restaurant
     end
   end
 
-  #TODO: remove this if its not being used
   def has_items?(*items)
     items.each do |item|
       unless @single_items.has_key?(item) || has_item_in_value_items?(item)
@@ -39,22 +38,21 @@ class Restaurant
   end
 
   def price(*items)
-    items.sort!
-    item_combinations = items.size.downto(1).inject([]){|result, size|
-      items.combination(size).each{|item_combo| result << item_combo}
-      result
-    }.map{|i| i.join("_")}
-    valid_price_combos = item_combinations.inject({}) do |result, item_combo|
-      if all_price_combinations.has_key?(item_combo)
-        result[item_combo] = all_price_combinations[item_combo]
-      end
-      result
+    if has_items?(*items)
+      items.sort!
+      item_combinations(items).inject({}){|result_hash, item_combos|
+        if all_price_combinations_include?(item_combos)
+          result_hash[item_combos] = 
+            item_combos.inject(0){|sum, item| 
+              item = item.join if item.is_a? Array
+              sum += all_price_combinations[item]
+            }
+        end
+        result_hash
+      }.values.min
+    else
+      nil
     end
-    valid_price_combos.inject({}){|result, array|
-      key, value = array
-      result[key] = valid_price_combos[key] if (result.keys.map{|k| k.split("_")}.flatten & key.split("_")).empty?
-      result
-    }.values.inject(&:+)
   end
 
   private
@@ -64,4 +62,25 @@ class Restaurant
     end
     false
   end
+
+  def item_combinations(items)
+    # 2..n-1 item combinations
+    result = (2...items.size).inject([]) do |inner_result, i|
+      items.combination(i).each do |item_combo|
+        inner_result << ([item_combo.join("_")] + (items - item_combo))
+      end
+      inner_result
+    end
+    result += [items.combination(1).to_a] + [[items.combination(items.size).to_a.join("_")]]
+    result
+  end
+
+  def all_price_combinations_include?(item_combos)
+    item_combos.each do |key|
+      key = key.join if key.is_a? Array
+      return false unless all_price_combinations.keys.include?(key)
+    end
+    true
+  end
+
 end

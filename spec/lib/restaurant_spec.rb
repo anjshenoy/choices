@@ -166,7 +166,12 @@ describe Restaurant do
         r.add_items(5.00, "burger", "fries", "shake")
       end
 
-      it "returns the sum of each item found, with a preference for combination items" do
+      it "returns the sum of each item found" do
+        r.price("burger", "fries", "drink").should == 5.00
+      end
+
+      it "overriddes the price for individual elements if value items are present" do
+        r.add_items(3.00, "burger")
         r.price("burger", "fries", "drink").should == 5.00
       end
     end
