@@ -101,11 +101,12 @@ describe Restaurant do
     end
   end
 
-#  context "single item price combinations" do
-#    before(:each) do
-#      r.add_items(3.00, "burger")
-#    end
-#    it "generates all possible price combinations for single items" do
-#    end
-#  end
+  context "single item price combinations" do
+    before(:each) do
+      r.add_items(3.00, "burger")
+    end
+    it "generates all possible price combinations for single items" do
+      r.single_item_combinations.should == {"fries"=>1.75, "burger"=>3.0, "burger_fries"=>4.75, "burger_fries" => 4.75}
+    end
+  end
 end
