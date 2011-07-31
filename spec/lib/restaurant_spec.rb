@@ -62,6 +62,7 @@ describe Restaurant do
   end
 
   context "price calculation algorithm" do
+
     it "first checks if it has the item" do
       r.should_receive(:has_items?).with(:fries).exactly(:once).and_return(true)
       r.price_for(:fries)
@@ -85,6 +86,7 @@ describe Restaurant do
     it "returns nil if the item does not exist" do
       r.price_for(:boo).should be_nil
     end
+
   end
 
 end

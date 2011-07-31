@@ -33,16 +33,23 @@ class Restaurant
     true
   end
 
-  def price_for(item)
-    if has_items?(item)
-      result = {}
-      result[item] = @single_items[item] if @single_items.has_key?(item)
-      @value_items.each_pair do |value_combo, price|
-        result[value_combo] = price if value_combo.include?(item)
+  def price_for(*items)
+    price_result = {}
+    (1..items.length).inject([]){|result, size|
+      items.combination(size).each {|combo| result << combo} 
+      result
+    }.each do |items|
+      if has_items?(*items)
+        price_result[items.first] = @single_items[items.first] if items.size == 1 && @single_items.has_key?(items.first)
+        @value_items.each_pair do |value_combo, price|
+          price_result[value_combo] = price if value_combo.join(", ").include?(items.join(","))
+        end
       end
-      result.sort{|a,b| a.last <=> b.last}.first.last
-    else 
+    end
+    if price_result.empty?
       nil
+    else
+      price_result.sort{|a,b| a.last <=> b.last}.first.last
     end
   end
 end
