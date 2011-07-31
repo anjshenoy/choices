@@ -101,12 +101,28 @@ describe Restaurant do
     end
   end
 
-  context "single item price combinations" do
-    before(:each) do
-      r.add_items(3.00, "burger")
+  context "price combinations" do
+    context "for single items" do
+      before(:each) do
+        r.add_items(3.00, "burger")
+      end
+      it "generates all possible price combinations for single items" do
+        r.all_price_combinations.should == {"fries"=>1.75, "burger"=>3.0, "burger_fries"=>4.75, "burger_fries" => 4.75}
+      end
     end
-    it "generates all possible price combinations for single items" do
-      r.single_item_combinations.should == {"fries"=>1.75, "burger"=>3.0, "burger_fries"=>4.75, "burger_fries" => 4.75}
+    context "when value items are present" do
+      before(:each) do
+        r.add_items(3.00, "burger")
+        r.add_items(4.50, "burger", "fries")
+        r.add_items(2.00, "shake")
+        r.add_items(6.25, "burger", "fries", "shake")
+      end
+      it "any single single item price combinations are overridden by value item combinations" do
+        r.all_price_combinations.should == {"fries"=>1.75, "burger"=>3.0, "shake" => 2.00, 
+          "burger_fries"=>4.50, "burger_shake" => 5.00, "fries_shake" => 3.75,
+          "burger_fries_shake" => 6.25}
+      end
     end
   end
+
 end

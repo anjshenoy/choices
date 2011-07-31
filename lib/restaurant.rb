@@ -28,13 +28,13 @@ class Restaurant
     true
   end
 
-  def single_item_combinations
+  def all_price_combinations
     @single_items.merge((2..@single_items.size).inject({}){|result, size|
       @single_items.keys.combination(size).each {|key_combo| 
         result[key_combo.sort.flatten.join("_")] = key_combo.inject(0){|sum, key| sum += @single_items[key]}
       }
       result
-    })
+    }).merge(@value_items)
   end
 
   def price_combinations(*items)
