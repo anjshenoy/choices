@@ -1,5 +1,6 @@
 class Restaurant
 
+  #TODO: change single_items and value_items into line_items
   WORD_DELIMITER = ", "
   attr_reader :id, :single_items, :value_items, :all_combinations
 
@@ -30,6 +31,7 @@ class Restaurant
   end
 
   #TODO: override by cost rather than overriding with value items
+  #TODO : skip this one
   def all_price_combinations
     @all_combinations ||= @single_items.merge((2..@single_items.size).inject({}){|result, size|
       @single_items.keys.combination(size).each {|key_combo| 
@@ -37,8 +39,11 @@ class Restaurant
       }
       result
     }).merge(@value_items)
+    puts @all_combinations.inspect
+    @all_combinations
   end
 
+  #TODO: calculate all combinations, then do a look up in line items
   def price(*items)
     if has_items?(*items)
       items.sort!
