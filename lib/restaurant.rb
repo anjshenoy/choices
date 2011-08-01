@@ -1,7 +1,7 @@
 class Restaurant
 
   WORD_DELIMITER = ", "
-  attr_reader :id, :single_items, :value_items
+  attr_reader :id, :single_items, :value_items, :all_combinations
 
   def initialize(id, price, *items)
     @id, @single_items, @value_items = id, Hash.new(0), Hash.new(0)
@@ -29,8 +29,9 @@ class Restaurant
     true
   end
 
+  #TODO: override by cost rather than overriding with value items
   def all_price_combinations
-    @single_items.merge((2..@single_items.size).inject({}){|result, size|
+    @all_combinations ||= @single_items.merge((2..@single_items.size).inject({}){|result, size|
       @single_items.keys.combination(size).each {|key_combo| 
         result[key_combo.sort.flatten.join(WORD_DELIMITER)] = key_combo.inject(0){|sum, key| sum += @single_items[key]}
       }
@@ -45,7 +46,7 @@ class Restaurant
         if all_price_combinations_include?(item_combos)
           result_hash[item_combos] = 
             item_combos.inject(0){|sum, item| 
-              item = item.join if item.is_a? Array
+              item = item.join if item.is_a?(Array)
               sum += all_price_combinations[item]
             }
         end
@@ -59,7 +60,7 @@ class Restaurant
   private
   def has_item_in_value_items?(item)
     @value_items.each do |key, value|
-      return true if key.include? item
+      return true if key.include?(item)
     end
     false
   end
@@ -73,12 +74,11 @@ class Restaurant
       inner_result
     end
     result += [items.combination(1).to_a] + [[items.combination(items.size).to_a.join(WORD_DELIMITER)]]
-    result
   end
 
   def all_price_combinations_include?(item_combos)
     item_combos.each do |key|
-      key = key.join if key.is_a? Array
+      key = key.join if key.is_a?(Array)
       return false unless all_price_combinations.keys.include?(key)
     end
     true
