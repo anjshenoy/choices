@@ -14,7 +14,7 @@ describe Restaurant do
 
 
     it "has a list of value items with the price for each, with the sorted items strigified as a key" do
-      Restaurant.new(1, 2.00, "burger", "fries", "drink").value_items.should == {"burger_drink_fries" => 2.00}
+      Restaurant.new(1, 2.00, "burger", "fries", "drink").value_items.should == {"burger, drink, fries" => 2.00}
     end
   end
 
@@ -28,14 +28,14 @@ describe Restaurant do
 
     it "can take on more value items" do
       r.add_items(2.25, "burger", "fries")
-      r.value_items.should == {"burger_fries" => 2.25}
+      r.value_items.should == {"burger, fries" => 2.25}
     end
 
     it "can take on single and value items" do
       r.add_items(2.00, "fries")
       r.add_items(2.25, "burger", "fries")
       r.single_items.should == {"burger" => 2.00, "fries" => 2.00}
-      r.value_items.should == {"burger_fries" => 2.25}
+      r.value_items.should == {"burger, fries" => 2.25}
     end
 
     it "throws an error if no items are provided" do
@@ -107,7 +107,7 @@ describe Restaurant do
         r.add_items(3.00, "burger")
       end
       it "generates all possible price combinations for single items" do
-        r.all_price_combinations.should == {"fries"=>1.75, "burger"=>3.0, "burger_fries"=>4.75, "burger_fries" => 4.75}
+        r.all_price_combinations.should == {"fries"=>1.75, "burger"=>3.0, "burger, fries" => 4.75}
       end
     end
     context "when value items are present" do
@@ -119,8 +119,8 @@ describe Restaurant do
       end
       it "any single single item price combinations are overridden by value item combinations" do
         r.all_price_combinations.should == {"fries"=>1.75, "burger"=>3.0, "shake" => 2.00, 
-          "burger_fries"=>4.50, "burger_shake" => 5.00, "fries_shake" => 3.75,
-          "burger_fries_shake" => 6.25}
+          "burger, fries"=>4.50, "burger, shake" => 5.00, "fries, shake" => 3.75,
+          "burger, fries, shake" => 6.25}
       end
     end
   end
@@ -173,6 +173,12 @@ describe Restaurant do
       it "overriddes the price for individual elements if value items are present" do
         r.add_items(3.00, "burger")
         r.price("burger", "fries", "drink").should == 5.00
+      end
+
+      it "boo!" do
+        r.add_items(3.00, "burger")
+        r.price("burger", "fries", "drink").should == 5.00
+        r.price("drink", "burger").should == 4.00
       end
     end
   end

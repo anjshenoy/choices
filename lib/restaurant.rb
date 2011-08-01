@@ -1,5 +1,6 @@
 class Restaurant
 
+  WORD_DELIMITER = ", "
   attr_reader :id, :single_items, :value_items
 
   def initialize(id, price, *items)
@@ -12,7 +13,7 @@ class Restaurant
     if items.size == 1
       @single_items[items.first] = price
     else
-      @value_items[items.sort.join("_")] = price
+      @value_items[items.sort.join(WORD_DELIMITER)] = price
     end
     if items.empty?
       raise ArgumentError.new("Data Error:: Item required in order to proceed")
@@ -31,7 +32,7 @@ class Restaurant
   def all_price_combinations
     @single_items.merge((2..@single_items.size).inject({}){|result, size|
       @single_items.keys.combination(size).each {|key_combo| 
-        result[key_combo.sort.flatten.join("_")] = key_combo.inject(0){|sum, key| sum += @single_items[key]}
+        result[key_combo.sort.flatten.join(WORD_DELIMITER)] = key_combo.inject(0){|sum, key| sum += @single_items[key]}
       }
       result
     }).merge(@value_items)
@@ -67,11 +68,11 @@ class Restaurant
     # 2..n-1 item combinations
     result = (2...items.size).inject([]) do |inner_result, i|
       items.combination(i).each do |item_combo|
-        inner_result << ([item_combo.join("_")] + (items - item_combo))
+        inner_result << ([item_combo.join(WORD_DELIMITER)] + (items - item_combo))
       end
       inner_result
     end
-    result += [items.combination(1).to_a] + [[items.combination(items.size).to_a.join("_")]]
+    result += [items.combination(1).to_a] + [[items.combination(items.size).to_a.join(WORD_DELIMITER)]]
     result
   end
 
