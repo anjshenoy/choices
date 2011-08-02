@@ -1,31 +1,26 @@
 class Restaurant
 
-  #TODO: change single_items and value_items into line_items
   WORD_DELIMITER = ", "
-  attr_reader :id, :single_items, :value_items, :all_combinations
+  attr_reader :id, :line_items
 
   def initialize(id, price, *items)
-    @id, @single_items, @value_items = id, Hash.new(0), Hash.new(0)
+    @id, @line_items = id, Hash.new(0)
     add_items(price, *items)
   end
 
 
   def add_items(price, *items)
-    if items.size == 1
-      @single_items[items.first] = price
-    else
-      @value_items[items.sort.join(WORD_DELIMITER)] = price
-    end
     if items.empty?
       raise ArgumentError.new("Data Error:: Item required in order to proceed")
     end
+    @line_items[items.sort.join(WORD_DELIMITER)] = price
   end
 
   def has_items?(*items)
+    keys = @line_items.keys.uniq.sort
     items.each do |item|
-      unless @single_items.has_key?(item) || has_item_in_value_items?(item)
-        return false
-      end
+      puts item
+      return false unless keys.include?(item)
     end
     true
   end

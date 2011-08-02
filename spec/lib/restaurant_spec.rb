@@ -9,12 +9,12 @@ describe Restaurant do
     end
 
     it "has a list of single items with the price for each" do
-      Restaurant.new(1, 2.00, "burger").single_items.should == {"burger" => 2.00}
+      Restaurant.new(1, 2.00, "burger").line_items.should == {"burger" => 2.00}
     end
 
 
     it "has a list of value items with the price for each, with the sorted items strigified as a key" do
-      Restaurant.new(1, 2.00, "burger", "fries", "drink").value_items.should == {"burger, drink, fries" => 2.00}
+      Restaurant.new(1, 2.00, "burger", "fries", "drink").line_items.should == {"burger, drink, fries" => 2.00}
     end
   end
 
@@ -23,19 +23,18 @@ describe Restaurant do
 
     it "can take on more single items" do
       r.add_items(2.00, "fries")
-      r.single_items.should == {"burger" => 2.00, "fries" => 2.00}
+      r.line_items.should == {"burger" => 2.00, "fries" => 2.00}
     end
 
     it "can take on more value items" do
       r.add_items(2.25, "burger", "fries")
-      r.value_items.should == {"burger, fries" => 2.25}
+      r.line_items.should == {"burger" => 2.00, "burger, fries" => 2.25}
     end
 
     it "can take on single and value items" do
       r.add_items(2.00, "fries")
       r.add_items(2.25, "burger", "fries")
-      r.single_items.should == {"burger" => 2.00, "fries" => 2.00}
-      r.value_items.should == {"burger, fries" => 2.25}
+      r.line_items.should == {"burger" => 2.00, "fries" => 2.00, "burger, fries" => 2.25}
     end
 
     it "throws an error if no items are provided" do
