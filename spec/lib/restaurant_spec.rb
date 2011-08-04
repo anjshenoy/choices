@@ -9,12 +9,12 @@ describe Restaurant do
     end
 
     it "has a list of single items with the price for each" do
-      Restaurant.new(1, 2.00, "burger").line_items.should == {"burger" => 2.00}
+      Restaurant.new(1, 2.00, "burger").line_items.should == {["burger"] => 2.00}
     end
 
 
     it "has a list of value items with the price for each, with the sorted items strigified as a key" do
-      Restaurant.new(1, 2.00, "burger", "fries", "drink").line_items.should == {"burger, drink, fries" => 2.00}
+      Restaurant.new(1, 2.00, "burger", "fries", "drink").line_items.should == {["burger", "drink", "fries"] => 2.00}
     end
   end
 
@@ -23,18 +23,18 @@ describe Restaurant do
 
     it "can take on more single items" do
       r.add_items(2.00, "fries")
-      r.line_items.should == {"burger" => 2.00, "fries" => 2.00}
+      r.line_items.should == {["burger"] => 2.00, ["fries"] => 2.00}
     end
 
     it "can take on more value items" do
       r.add_items(2.25, "burger", "fries")
-      r.line_items.should == {"burger" => 2.00, "burger, fries" => 2.25}
+      r.line_items.should == {["burger"] => 2.00, ["burger", "fries"] => 2.25}
     end
 
     it "can take on single and value items" do
       r.add_items(2.00, "fries")
       r.add_items(2.25, "burger", "fries")
-      r.line_items.should == {"burger" => 2.00, "fries" => 2.00, "burger, fries" => 2.25}
+      r.line_items.should == {["burger"] => 2.00, ["fries"] => 2.00, ["burger", "fries"] => 2.25}
     end
 
     it "throws an error if no items are provided" do
@@ -100,103 +100,29 @@ describe Restaurant do
     end
   end
 
-  context "price combinations" do
-    context "for single items" do
-      before(:each) do
-        r.add_items(3.00, "burger")
-      end
-      it "generates all possible price combinations for single items" do
-        r.all_price_combinations.should == {"fries"=>1.75, "burger"=>3.0, "burger, fries" => 4.75}
-      end
-    end
-    context "when value items are present" do
-      before(:each) do
-        r.add_items(3.00, "burger")
-        r.add_items(4.50, "burger", "fries")
-        r.add_items(2.00, "shake")
-      end
-      it "any single single item price combinations are overridden by value item combinations" do
-        r.all_price_combinations.should == {"fries"=>1.75, "burger"=>3.0, "shake" => 2.00, 
-          "burger, fries"=>4.50, "burger, shake" => 5.00, "fries, shake" => 3.75,
-          "burger, fries, shake" => 6.50 }
-      end
-    end
-  end
-
-
   context "price calculator" do
 
-    it "returns nil if the item is not in the menu" do
-      r.price("boo").should be_nil
+    context "returns nil if the item(s) do not exist" do
+      it "for single items" do
+        r.price("boo").should be_nil
+      end
+      it "for multiple items" do
+        r.price("boo", "baa").should be_nil
+      end
     end
 
-    context "for single items" do
-      it "finds the price for a single item" do
+    context "returns the price if the item(s) exist" do
+      it "for single items" do
         r.price("fries").should == 1.75
       end
-
-      it "returns the total price if a combination of single items is provided" do
-        r.add_items(3.00, "burger")
-        r.price("fries", "burger").should == 4.75
+      it "matches a single item against a list of multiple items if one exists" do
+        r.add_items(5.00, "burger", "fries")
+        r.price("burger").should == 5.00
       end
-    end
-
-    context "for value items" do
-      before(:each) do
-        r.add_items(4.00, "burger", "fries")
-        r.add_items(5.00, "burger", "fries", "shake")
+      it "for multiple items" do
+        r.add_items(5.00, "burger", "fries")
+        r.price("burger", "fries").should == 5.00
       end
-
-      it "finds the price for a single value item" do
-        r.price("fries", "burger").should == 4.00
-      end
-
-      it "returns the total price if a combination of value items is provided" do
-        r.add_items(3.00, "burger")
-        r.price("fries", "burger", "shake").should == 5.00
-      end
-    end
-
-    context "for single/value items in combination" do
-      before(:each) do
-        r.add_items(1.00, "drink")
-        r.add_items(4.00, "burger", "fries")
-        r.add_items(5.00, "burger", "fries", "shake")
-      end
-
-      it "returns the sum of each item found" do
-        r.price("burger", "fries", "drink").should == 5.00
-      end
-
-      it "overriddes the price for individual elements if value items are present" do
-        r.add_items(3.00, "burger")
-        r.price("burger", "fries", "drink").should == 5.00
-      end
-    end
-  end
-
-  context "with different menu options" do
-    it "always comes up with the most optimal price" do
-      r = Restaurant.new(1, 1.75, "fries")
-#      r.add_items(3.00, "burger")
-#      r.add_items(1.00, "drink")
-#      r.add_items(2.00, "shake")
-#      r.add_items(0.50, "mustard")
-#      r.add_items(1.25, "coleslaw_with_sweet_mayo")
-#      r.add_items(3.50, "fries", "shake")
-#      r.add_items(5.00, "burger", "fries", "drink")
-      r.add_items(4.80, "burger", "fries", "mayo")
-#      r.add_items(4.75, "burger", "fries", "mustard")
-#      r.add_items(6.25, "burger", "fries", "drink", "coleslaw_with_sweet_mayo")
-
-#      r.price("burger", "fries").should == 4.75
-#      r.price("burger", "fries", "drink", "coleslaw_with_sweet_mayo").should == 6.25
-#      r.price("burger", "coleslaw_with_sweet_mayo", "drink", "fries").should == 6.25
-#      r.price("burger", "coleslaw_with_sweet_mayo").should == 4.25
-#      r.price("burger", "fries", "shake").should == 6.50
-#      r.price("burger", "fries", "drink").should == 5.00
-#      r.price("burger", "fries", "shake", "drink").should == 7.00
-      r.price("mayo").should == 4.80
     end
   end
 end
