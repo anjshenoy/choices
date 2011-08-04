@@ -13,75 +13,31 @@ class Restaurant
     if items.empty?
       raise ArgumentError.new("Data Error:: Item required in order to proceed")
     end
-    @line_items[items.sort.join(WORD_DELIMITER)] = price
+    @line_items[items.sort] = price
   end
 
   def has_items?(*items)
-    keys = @line_items.keys.uniq.sort
+    keys = @line_items.keys.flatten.uniq.sort
     items.each do |item|
-      puts item
       return false unless keys.include?(item)
     end
     true
   end
 
-  #TODO: override by cost rather than overriding with value items
-  #TODO : skip this one
-  def all_price_combinations
-    @all_combinations ||= @single_items.merge((2..@single_items.size).inject({}){|result, size|
-      @single_items.keys.combination(size).each {|key_combo| 
-        result[key_combo.sort.flatten.join(WORD_DELIMITER)] = key_combo.inject(0){|sum, key| sum += @single_items[key]}
-      }
-      result
-    }).merge(@value_items)
-    puts @all_combinations.inspect
-    @all_combinations
-  end
-
-  #TODO: calculate all combinations, then do a look up in line items
   def price(*items)
-    if has_items?(*items)
-      items.sort!
-      item_combinations(items).inject({}){|result_hash, item_combos|
-        if all_price_combinations_include?(item_combos)
-          result_hash[item_combos] = 
-            item_combos.inject(0){|sum, item| 
-              item = item.join if item.is_a?(Array)
-              sum += all_price_combinations[item]
-            }
-        end
-        result_hash
-      }.values.min
-    else
-      nil
-    end
-  end
-
-  private
-  def has_item_in_value_items?(item)
-    @value_items.each do |key, value|
-      return true if key.include?(item)
-    end
-    false
-  end
-
-  def item_combinations(items)
-    # 2..n-1 item combinations
-    result = (2...items.size).inject([]) do |inner_result, i|
-      items.combination(i).each do |item_combo|
-        inner_result << ([item_combo.join(WORD_DELIMITER)] + (items - item_combo))
+    return nil unless self.has_items?(*items)
+    items.each do |item|
+      puts "item = #{item}"
+      key_matches = @line_items.keys.select{|k| k.include?(item)}
+      prices = []
+      key_matches.each do |key|
+        puts "key = #{key}"
+        prices << @line_items[key]
       end
-      inner_result
+      puts prices.inspect
     end
-    result += [items.combination(1).to_a] + [[items.combination(items.size).to_a.join(WORD_DELIMITER)]]
-  end
-
-  def all_price_combinations_include?(item_combos)
-    item_combos.each do |key|
-      key = key.join if key.is_a?(Array)
-      return false unless all_price_combinations.keys.include?(key)
+    if items.size == 1
+      return @line_items[[items.first]]
     end
-    true
   end
-
 end
