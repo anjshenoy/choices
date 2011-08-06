@@ -2,7 +2,6 @@ require File.dirname(__FILE__) + "/../../lib/restaurant"
 
 describe Restaurant do
 
-  let(:r) {Restaurant.new(1, 1.75, "fries")}
   context "initialization" do
     it "has an ID" do
       Restaurant.new(1, nil, nil).id.should == 1
@@ -45,6 +44,8 @@ describe Restaurant do
   context "item check" do
 
     context "against single item list" do
+      let(:r) {Restaurant.new(1, 1.75, "fries")}
+
       it "returns true if it has a particular item" do
         r.has_items?("fries").should be_true
       end
@@ -74,6 +75,8 @@ describe Restaurant do
     end
 
     context "against both single and value item lists" do
+      let(:r) {Restaurant.new(1, 1.75, "fries")}
+
       before(:each) do
         r.add_items(5.00, "burger", "shake")
       end
@@ -103,6 +106,8 @@ describe Restaurant do
   context "price calculator" do
 
     context "returns nil if the item(s) do not exist" do
+      let(:r) {Restaurant.new(1, 1.75, "fries")}
+
       it "for single items" do
         r.price("boo").should be_nil
       end
@@ -112,6 +117,8 @@ describe Restaurant do
     end
 
     context "returns the price if the item(s) exist" do
+      let(:r) {Restaurant.new(1, 1.75, "fries")}
+
       it "for single items" do
         r.price("fries").should == 1.75
       end
@@ -131,6 +138,17 @@ describe Restaurant do
       it "sorts the order items and then applies them against the menu items" do
         r.add_items(5.00, "burger", "fries")
         r.price("burger", "fries").should == r.price("fries", "burger")
+      end
+    end
+    context "when the order items are out of order with the menu items" do
+      let(:r) {Restaurant.new(1, 1.75, "fries")}
+      before(:each) do
+        r.add_items(5.00, "burger", "fries")
+        r.add_items(6.00, "burger", "fries", "shake")
+      end
+
+      it "finds the price if items are included in the menu list but don't exactly match the order" do
+        r.price("burger", "shake").should == 6.00
       end
     end
   end

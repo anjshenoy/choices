@@ -34,6 +34,16 @@ class Restaurant
         prices[key] = @line_items[key]
       end
     end
-    prices[items] || prices.select{|k,v| k.include?(items.join(WORD_DELIMITER))}.values.min
+    prices[items] || find_inclusive_prices(prices, items)
+  end
+
+  private
+  def find_inclusive_prices(prices, items)
+    prices.select{|k,v| 
+      items.inject([]){|result, item|
+        result << k.include?(item)
+        result
+      }.all?{|x| x == true}
+    }.values.min
   end
 end
