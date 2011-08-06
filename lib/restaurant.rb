@@ -17,11 +17,7 @@ class Restaurant
   end
 
   def has_items?(*items)
-    keys = @line_items.keys.flatten.uniq.sort
-    items.each do |item|
-      return false unless keys.include?(item)
-    end
-    true
+    menu_items_include_items?(@line_items.keys.flatten.uniq.sort, items)
   end
 
   def price(*items)
@@ -29,21 +25,19 @@ class Restaurant
     items.sort!
     prices = {}
     items.each do |item|
-      keys = @line_items.keys.select{|k| k.include?(item)}
-      keys.each do |key|
-        prices[key] = @line_items[key]
-      end
+      prices.merge!(@line_items.select{|menu_items, value| menu_items.include?(item)})
     end
     prices[items] || find_inclusive_prices(prices, items)
   end
 
   private
   def find_inclusive_prices(prices, items)
-    prices.select{|k,v| 
-      items.inject([]){|result, item|
-        result << k.include?(item)
-        result
-      }.all?{|x| x == true}
+    prices.select{|menu_items, value| 
+      menu_items_include_items?(menu_items, items)
     }.values.min
+  end
+
+  def menu_items_include_items?(key, items)
+    items.all?{|item| key.include?(item)}
   end
 end
