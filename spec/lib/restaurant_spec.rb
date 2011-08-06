@@ -123,6 +123,15 @@ describe Restaurant do
         r.add_items(5.00, "burger", "fries")
         r.price("burger", "fries").should == 5.00
       end
+      it "finds the minimum value when items match" do
+        r.add_items(6.00, "burger", "fries", "shake")
+        r.add_items(5.00, "burger", "fries")
+        r.price("burger").should == 5.00
+      end
+      it "sorts the order items and then applies them against the menu items" do
+        r.add_items(5.00, "burger", "fries")
+        r.price("burger", "fries").should == r.price("fries", "burger")
+      end
     end
   end
 end

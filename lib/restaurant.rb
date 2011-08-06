@@ -26,16 +26,14 @@ class Restaurant
 
   def price(*items)
     return nil unless self.has_items?(*items)
+    items.sort!
     prices = {}
     items.each do |item|
-      key_matches = @line_items.keys.select{|k| k.include?(item)}
-      key_matches.each do |key|
+      keys = @line_items.keys.select{|k| k.include?(item)}
+      keys.each do |key|
         prices[key] = @line_items[key]
       end
     end
-    return prices.values.first
-    if items.size == 1
-      return @line_items[[items.first]]
-    end
+    prices[items] || prices.select{|k,v| k.include?(items.join(WORD_DELIMITER))}.values.min
   end
 end
