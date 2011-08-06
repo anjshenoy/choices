@@ -73,83 +73,20 @@ describe Restaurant do
         r.has_items?("coleslaw_with_sweet_mayo").should be_true
       end
     end
-
-    context "against both single and value item lists" do
-      let(:r) {Restaurant.new(1, 1.75, "fries")}
-
-      before(:each) do
-        r.add_items(5.00, "burger", "shake")
-      end
-
-      it "returns true if the item exists in single or value item list" do
-          r.has_items?("fries").should be_true
-          r.has_items?("shake").should be_true
-      end
-      it "returns false if the item exists in neither the single or value item list" do
-          r.has_items?("boo").should be_false
-      end
-      context "for multiple items" do
-        it "returns true if the item combination exists in the value item list" do
-          r.has_items?("burger", "shake").should be_true
-        end
-        it "returns true if the item combination exists in the single item list" do
-          r.add_items(2.00, "shake")
-          r.has_items?("fries", "shake").should be_true
-        end
-        it "returns true if the item combination exists in the single or value item list" do
-          r.has_items?("fries", "shake").should be_true
-        end
-      end
-    end
   end
 
-  context "price calculator" do
+  context "price calculation" do
+    let(:r) { Restaurant.new(1, 5.00, "burger", "fries", "drink") }
 
-    context "returns nil if the item(s) do not exist" do
-      let(:r) {Restaurant.new(1, 1.75, "fries")}
-
-      it "for single items" do
-        r.price("boo").should be_nil
-      end
-      it "for multiple items" do
-        r.price("boo", "baa").should be_nil
-      end
+    it "returns nil if the order item does not exist in its menu" do
+      r.price("boo").should be_nil
     end
 
-    context "returns the price if the item(s) exist" do
-      let(:r) {Restaurant.new(1, 1.75, "fries")}
-
-      it "for single items" do
-        r.price("fries").should == 1.75
-      end
-      it "matches a single item against a list of multiple items if one exists" do
-        r.add_items(5.00, "burger", "fries")
-        r.price("burger").should == 5.00
-      end
-      it "for multiple items" do
-        r.add_items(5.00, "burger", "fries")
-        r.price("burger", "fries").should == 5.00
-      end
-      it "finds the minimum value when items match" do
-        r.add_items(6.00, "burger", "fries", "shake")
-        r.add_items(5.00, "burger", "fries")
-        r.price("burger").should == 5.00
-      end
-      it "sorts the order items and then applies them against the menu items" do
-        r.add_items(5.00, "burger", "fries")
-        r.price("burger", "fries").should == r.price("fries", "burger")
-      end
-    end
-    context "when the order items are out of order with the menu items" do
-      let(:r) {Restaurant.new(1, 1.75, "fries")}
-      before(:each) do
-        r.add_items(5.00, "burger", "fries")
-        r.add_items(6.00, "burger", "fries", "shake")
-      end
-
-      it "finds the price if items are included in the menu list but don't exactly match the order" do
-        r.price("burger", "shake").should == 6.00
-      end
-    end
+#    context "first scans the menu to find the most relevant items to run against" do
+#      it "finds the most relevant match for a single order item" do
+#        r.price("fries").should == 5.00
+#      end
+#
+#    end
   end
 end
