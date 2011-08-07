@@ -84,7 +84,7 @@ describe Restaurant do
 
     context "exact match" do
       it "returns the price right away if an exact match is found" do
-        r.should_not_receive(:find_price_by_relevant_match)
+        r.should_not_receive(:all_prices_by_relevant_match)
         r.price("burger", "fries", "drink")
       end
     end
@@ -108,6 +108,25 @@ describe Restaurant do
 
       it "finds the price for a multiple order items - if they exist as part of a value menu" do
         r.price("burger", "fries", "drink").should == 5.00
+      end
+    end
+
+    context "finding the minimum price" do
+      it "first runs all items against all the menu items and returns the relevant matches" do
+        r.should_receive(:relevant_matches).with(r.line_items.to_a, ["burger", "drink"]).and_return({})
+        r.price("burger", "drink")
+      end
+      it "matches as greedily as possible" do
+        r.price("burger", "fries").should == 5.00
+      end
+      context "when there are combinations of items in the menu it finds the least expensive combination by building relevant search trees" do
+        it "" do
+          r = Restaurant.new(1, 5.00, "burger", "fries", "drink")
+          items = ["burger", "fries"]
+          r.add_items(2.00, "fries")
+          r.add_items(2.50, "burger")
+          r.price("burger", "fries").should == 4.50
+        end
       end
     end
   end
