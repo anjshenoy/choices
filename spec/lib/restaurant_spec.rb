@@ -4,7 +4,7 @@ describe Restaurant do
 
   context "initialization" do
     it "has an ID" do
-      Restaurant.new(1, nil, nil).id.should == 1
+      Restaurant.new(1, 2, nil).id.should == 1
     end
 
     it "has a list of single items with the price for each" do
@@ -36,8 +36,16 @@ describe Restaurant do
       r.line_items.should == {["burger"] => 2.00, ["fries"] => 2.00, ["burger", "fries"] => 2.25}
     end
 
-    it "throws an error if no items are provided" do
-      lambda{r.add_items(2.25)}.should raise_error(ArgumentError, "Data Error:: Item required in order to proceed")
+    context "if prices or items are invalid" do
+      it "throws an error if no items are provided" do
+        lambda{r.add_items(2.25)}.should raise_error(ArgumentError, "Data Error:: Menu items are missing for Restaurant ID: #{r.id} and are required in order to proceed")
+      end
+      it "throws an error if the price cannot be converted to float" do
+        lambda{r.add_items("asd", "fries")}.should raise_error(ArgumentError, "Data Error:: Price is invalid for restaurant ID:#{r.id} and is required in order to proceed")
+      end
+      it "throws an error if the restaurant id is 0 i.e. invalid" do
+        lambda{Restaurant.new("boo", 2.0, "fries")}.should raise_error(ArgumentError, "Data Error:: Restaurant ID: boo is not acceptable. Please correct the data file")
+      end
     end
   end
 

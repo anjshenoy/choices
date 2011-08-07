@@ -4,9 +4,12 @@ class Choices
 
   attr_reader :restaurants
 
-  def initialize(restaurant_id, price, *items)
+  def initialize(path_to_file)
     @restaurants = {}
-    add_items(restaurant_id, price, *items)
+    File.open(path_to_file).each_line do |line|
+      restaurant_id, price, *items = line.gsub("\n", "").split(", ")
+      add_items(restaurant_id.to_i, price.to_f, *items)
+    end
   end
 
   def add_items(restaurant_id, price, *items)

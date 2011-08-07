@@ -3,6 +3,9 @@ class Restaurant
   attr_reader :id, :line_items
 
   def initialize(id, price, *items)
+    if id.to_i == 0
+      raise ArgumentError.new("Data Error:: Restaurant ID: #{id} is not acceptable. Please correct the data file")
+    end
     @id, @line_items = id, {}
     add_items(price, *items)
   end
@@ -10,7 +13,9 @@ class Restaurant
 
   def add_items(price, *items)
     if items.empty?
-      raise ArgumentError.new("Data Error:: Item required in order to proceed")
+      raise ArgumentError.new("Data Error:: Menu items are missing for Restaurant ID: #{@id} and are required in order to proceed")
+    elsif price.to_f == 0.0
+      raise ArgumentError.new("Data Error:: Price is invalid for restaurant ID:#{@id} and is required in order to proceed")
     end
     @line_items[items.sort] = price
   end

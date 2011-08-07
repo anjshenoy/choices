@@ -3,14 +3,44 @@ require File.dirname(__FILE__) + "/../../lib/choices"
 
 describe Choices do
 
-  let(:choices) {Choices.new(1, 3.00, "burger")}
+  let(:choices) {Choices.new(File.dirname(__FILE__) + "/../config/dataset.csv")}
 
   context "initialization" do
-    it "initializes itself with a restaurant id and a menu item" do
-      restaurants = Choices.new(1, 3.00, "burger").restaurants
+    let(:path) {"path/to/file"}
+    let(:iostream) {stub("iostream")}
+
+    before(:each) do
+      iostream.stub(:each_line).and_yield("1, 2.00, fries\n")
+    end
+
+    it "loads the restaurant dataset from a file given a path to the file" do
+      File.should_receive(:open).and_return(iostream)
+      Choices.new(path)
+    end
+
+    it "loads each line of the file into a datastructure called restaurants, indexed by id" do
+      choices.restaurants.keys.should == [1]
+    end
+
+    it "throws a Data Error if any input item is incorrect" do
+      iostream_error = stub("iostream_error")
+      iostream_error.stub(:each_line).and_yield("1, 2.00, \n")
+      File.stub(:open).and_return(iostream_error)
+      lambda { Choices.new(path)}.should raise_error(ArgumentError)
+    end
+
+    it "removes the \\n (if it exists) from each line read from disk" do
+      File.stub(:open).and_return(iostream)
+      Choices.new(path).restaurants[1].line_items.first.first.last.end_with?("\n").should_not be_true
+    end
+
+    it "process the data and loads the first restaurant" do
+      File.stub(:open).and_return(iostream)
+      restaurants = Choices.new(path).restaurants
       restaurants.size.should == 1
-      restaurants.values.first.id.should == 1
-      restaurants.values.first.line_items.should == {["burger"] => 3.00}
+      first_restaurant = restaurants.values.first
+      first_restaurant.id.should == 1
+      first_restaurant.line_items.should == {["fries"] => 2.00}
     end
   end
 
