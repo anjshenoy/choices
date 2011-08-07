@@ -49,6 +49,6 @@ class Restaurant
   def relevant_matches(list, items)
     list.select{ |array| 
       (array.first & items).size > 0
-    }
+    }.sort{|a,b| b.first.size <=> a.first.size}
   end
 end

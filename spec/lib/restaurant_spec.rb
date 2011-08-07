@@ -116,17 +116,17 @@ describe Restaurant do
         r.should_receive(:relevant_matches).with(r.line_items.to_a, ["burger", "drink"]).and_return({})
         r.price("burger", "drink")
       end
+
       it "matches as greedily as possible" do
         r.price("burger", "fries").should == 5.00
       end
-      context "when there are combinations of items in the menu it finds the least expensive combination by building relevant search trees" do
-        it "" do
-          r = Restaurant.new(1, 5.00, "burger", "fries", "drink")
-          items = ["burger", "fries"]
-          r.add_items(2.00, "fries")
-          r.add_items(2.50, "burger")
-          r.price("burger", "fries").should == 4.50
-        end
+
+      it "finds the least expensive combination by building relevant search trees when there are overlapping combinations of items in the menu " do
+        r = Restaurant.new(1, 2.50, "burger")
+        items = ["burger", "fries"]
+        r.add_items(2.00, "fries")
+        r.add_items(5.00, "burger", "fries", "drink")
+        r.price("burger", "fries").should == 4.50
       end
     end
   end
