@@ -1,6 +1,5 @@
 class Restaurant
 
-  WORD_DELIMITER = ", "
   attr_reader :id, :line_items
 
   def initialize(id, price, *items)
@@ -17,49 +16,46 @@ class Restaurant
   end
 
   def has_items?(*items)
-    (@line_items.keys.flatten.uniq.sort & items.sort!) == items
+    items.sort!
+    (@line_items.keys.flatten.uniq.sort & items) == items
   end
 
   def price(*items)
-    return nil unless self.has_items?(*items)
     items.sort!
-    @line_items[items] || all_prices_by_relevant_match(@line_items.to_a, items).keys.min
+    return nil unless self.has_items?(*items)
+    @line_items[items] || find_best_price(@line_items.to_a, items).collect(&:last).inject(&:+)
   end
 
   private
-  def all_prices_by_relevant_match(menu_items, items, price_combinations={}, individual_prices={})
-    relevant_matches(menu_items, items).each do |array|
-      keys, price = array
-      puts "keys = #{keys}"
-      intersection_set = keys & items
-      if intersection_set.size > 0
-        individual_prices.merge!({keys => price})
-        menu_items.delete_if{|arr| puts "arr = #{arr}"; (arr.first & keys) == keys}
-        puts "menu_items = #{menu_items}"
-      end
-      p "individual_prices = " + individual_prices.inspect
-      remaining_items = items - intersection_set
-      sum_so_far = individual_prices.values.inject(&:+)
-      puts sum_so_far
-      if remaining_items.empty?
-        price_combinations.merge!({sum_so_far => individual_prices})
-        p price_combinations
-        individual_prices = {}
-      else
-        puts "calling recursive on individual_prices"
-        puts remaining_items
-        puts sum_so_far
-        if sum_so_far < price_combinations.keys.min.to_i
-          all_prices_by_relevant_match(menu_items, remaining_items, price_combinations, individual_prices)
+  def find_best_price(menu_items, order_items, best_price_so_far = 1000000)
+    price_combinations =[] 
+    local_best_combination = []
+    relevant_matches(menu_items, order_items).each do |candidate|
+      if candidate.last < best_price_so_far
+        if candidate.first == order_items
+          return [candidate]
         end
+        local_best_combination = [candidate]
+        matched_items = candidate.first & order_items
+        remaining_items = order_items - matched_items
+        if remaining_items.size > 0
+          remaining_menu_item_combo_price = find_best_price(menu_items - candidate, remaining_items, best_price_so_far)
+          unless remaining_menu_item_combo_price.nil?
+            local_best_combination += remaining_menu_item_combo_price
+          end
+        end
+        best_price_so_far = local_best_combination.collect(&:last).inject(&:+)
+      end
+      if price_combinations.empty? || price_combinations.collect(&:last).inject(&:+) > best_price_so_far
+        price_combinations = local_best_combination
       end
     end
     price_combinations
   end
 
-  def relevant_matches(list, items)
-    list.select{ |array| 
-      (array.first & items).size > 0
-    }
+  def relevant_matches(menu_items, order_items)
+    menu_items.select{|keys, price|
+      (keys & order_items).size > 0
+    }.sort{|a,b| b.first.size <=> a.first.size}
   end
 end

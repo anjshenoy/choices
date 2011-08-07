@@ -82,10 +82,38 @@ describe Restaurant do
       r.price("boo").should be_nil
     end
 
-    context "exact match" do
-      it "returns the price right away if an exact match is found" do
-        r.should_not_receive(:all_prices_by_relevant_match)
+    context "if an exact match is found" do
+      it "does not look for the best price by searching through menu item combinations" do
+        r.should_not_receive(:find_best_price)
         r.price("burger", "fries", "drink")
+      end
+      it "returns the price right away" do
+        r.price("burger", "fries", "drink").should == 5.00
+      end
+    end
+
+    context "if an exact match is not found" do
+      before(:each) do
+        r.add_items(5.00, "bourbon")
+        r.add_items(2.00, "soda")
+        r.add_items(3.00, "burger", "fries")
+      end
+      context "first build relevant matches" do
+        it "a set of items that have at least one menu element in common between menu items and order items" do
+          r.should_receive(:relevant_matches).
+            with(r.line_items.to_a, ["burger"]).
+            and_return([[["burger", "fries", "drink"], 5.00], [["burger", "fries"], 3.00]])
+          r.price("burger")
+        end
+        it "finds the best price by running the order item against the list of relevant items" do
+          r.price("burger").should == 3.00
+        end
+      end
+
+      context "if there are multiple order items and there is no exact match" do
+        it "scans the menu recursively to find the lowest price" do
+          r.price("burger", "soda").should == 5.00
+        end
       end
     end
 
@@ -95,7 +123,9 @@ describe Restaurant do
       end
     end
 
+    #TODO :should I include these?
     context "when a menu has multiple items" do
+      let(:r) { Restaurant.new(1, 5.00, "burger", "fries", "drink") }
       before(:each) do
         r.add_items(2.00, "fries")
         r.add_items(3.00, "burger")
