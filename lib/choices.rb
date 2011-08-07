@@ -22,12 +22,12 @@ class Choices
 
   #TODO :test for empty items
   def best_match(*items)
-    @restaurants.inject({}){|result, array|
+    result = @restaurants.inject({}){|result, array|
       restaurant_id, restaurant = array
       result[restaurant_id] = restaurant.price(*items)
       result
-    }.select{|k,v| !v.nil?}.sort{|a,b| a.last <=> b.last}.first.join(", ")
+    }.select{|k,v| !v.nil?}.sort{|a,b| a.last <=> b.last}.first
+    result.nil? ? "Sorry, no match found for #{items.join(", ")}" : result.join(", ")
   end
-
 
 end

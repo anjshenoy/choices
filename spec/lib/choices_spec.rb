@@ -22,7 +22,7 @@ describe Choices do
       choices.restaurants.keys.should == [1]
     end
 
-    it "throws a Data Error if any input item is incorrect" do
+    it "propagates the Data Error from the Restaurant classs if any input item is incorrect" do
       iostream_error = stub("iostream_error")
       iostream_error.stub(:each_line).and_yield("1, 2.00, \n")
       File.stub(:open).and_return(iostream_error)
@@ -34,7 +34,7 @@ describe Choices do
       Choices.new(path).restaurants[1].line_items.first.first.last.end_with?("\n").should_not be_true
     end
 
-    it "process the data and loads the first restaurant" do
+    it "processes the data for each new line" do
       File.stub(:open).and_return(iostream)
       restaurants = Choices.new(path).restaurants
       restaurants.size.should == 1
@@ -108,6 +108,10 @@ describe Choices do
       choices.add_items(3, 2.50, "burger")
       choices.add_items(3, 6.00, "burger", "shake", "fries")
       choices.best_match("burger", "shake", "fries").should == "3, 6.0"
+    end
+
+    it "returns a nice error message if there's no match" do
+      choices.best_match("boo").should == "Sorry, no match found for boo"
     end
   end
 end
