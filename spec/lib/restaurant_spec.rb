@@ -123,10 +123,19 @@ describe Restaurant do
 
       it "finds the least expensive combination by building relevant search trees when there are overlapping combinations of items in the menu " do
         r = Restaurant.new(1, 2.50, "burger")
-        items = ["burger", "fries"]
         r.add_items(2.00, "fries")
         r.add_items(5.00, "burger", "fries", "drink")
         r.price("burger", "fries").should == 4.50
+      end
+
+      context "tree pruning" do
+        it "stops aggregating individual prices if the sum of individual item prices found is greater than or equal to the minimum price_combination found" do
+          r = Restaurant.new(1, 4.50, "burger", "fries")
+          r.add_items(3.00, "burger", "drink")
+          r.add_items(5.00, "bourbon")
+          r.add_items(5.00, "burger", "fries", "drink")
+          r.price("fries", "bourbon").should == 9.50
+        end
       end
     end
   end
