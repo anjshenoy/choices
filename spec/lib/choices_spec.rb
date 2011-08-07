@@ -37,24 +37,12 @@ describe Choices do
       it "can add menu items for one restaurant" do
         choices.add_items(1, 1.50, "fries")
         choices.add_items(1, 4.25, "burger", "fries")
-<<<<<<< HEAD
         choices.restaurants.values.first.line_items.should == {["burger"] => 3.00, 
                                                                ["fries"] => 1.50, 
                                                                ["burger", "fries"] => 4.25}
       end
 
       it "can add menu items for multiple restaurants" do
-=======
-        choices.add_items(1, 3.25, "shake", "fries")
-        choices.restaurants.values.first.line_items.should == {["burger"] => 3.00, 
-                                                               ["fries"] => 1.50, 
-                                                               ["shake"] => 2.00, 
-                                                               ["burger", "fries"] => 4.25, 
-                                                               ["fries", "shake"] => 3.25}
-      end
-
-      it "can add single/value items for multiple restaurants" do
->>>>>>> origin/master
         choices.add_items(1, 1.50, "fries")
         choices.add_items(2, 2.00, "shake")
         choices.add_items(2, 4.25, "burger", "fries")
