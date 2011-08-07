@@ -4,7 +4,7 @@ class Restaurant
   attr_reader :id, :line_items
 
   def initialize(id, price, *items)
-    @id, @line_items = id, Hash.new(0)
+    @id, @line_items = id, {}
     add_items(price, *items)
   end
 
@@ -22,5 +22,14 @@ class Restaurant
 
   def price(*items)
     return nil unless self.has_items?(*items)
+    items.sort!
+    @line_items[items] || find_price_by_relevant_match(items)
+  end
+
+  private
+  def find_price_by_relevant_match(items)
+    @line_items.select{|menu_items, price| 
+      (menu_items & items).size > 0
+    }.values.first
   end
 end

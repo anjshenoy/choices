@@ -82,11 +82,33 @@ describe Restaurant do
       r.price("boo").should be_nil
     end
 
-#    context "first scans the menu to find the most relevant items to run against" do
-#      it "finds the most relevant match for a single order item" do
-#        r.price("fries").should == 5.00
-#      end
-#
-#    end
+    context "exact match" do
+      it "returns the price right away if an exact match is found" do
+        r.should_not_receive(:find_price_by_relevant_match)
+        r.price("burger", "fries", "drink")
+      end
+    end
+
+    context "inclusive match - when an item exists as part of a menu" do
+      it "returns the price of the value meal i.e. the larger grouping of items" do
+        r.price("fries").should == 5.00
+      end
+    end
+
+    context "when a menu has multiple items" do
+      before(:each) do
+        r.add_items(2.00, "fries")
+        r.add_items(3.00, "burger")
+        r.add_items(1.00, "drink")
+      end
+
+      it "finds the price for a single order item" do
+        r.price("fries").should == 2.00
+      end
+
+      it "finds the price for a multiple order items - if they exist as part of a value menu" do
+        r.price("burger", "fries", "drink").should == 5.00
+      end
+    end
   end
 end
