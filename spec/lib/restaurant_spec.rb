@@ -111,60 +111,8 @@ describe Restaurant do
       end
 
       context "if there are multiple order items and there is no exact match" do
-        it "scans the menu recursively to find the lowest price" do
+        it "scans the menu recursively for relevant matches to find the lowest price" do
           r.price("burger", "soda").should == 5.00
-        end
-      end
-    end
-
-    context "inclusive match - when an item exists as part of a menu" do
-      it "returns the price of the value meal i.e. the larger grouping of items" do
-        r.price("fries").should == 5.00
-      end
-    end
-
-    #TODO :should I include these?
-    context "when a menu has multiple items" do
-      let(:r) { Restaurant.new(1, 5.00, "burger", "fries", "drink") }
-      before(:each) do
-        r.add_items(2.00, "fries")
-        r.add_items(3.00, "burger")
-        r.add_items(1.00, "drink")
-      end
-
-      it "finds the price for a single order item" do
-        r.price("fries").should == 2.00
-      end
-
-      it "finds the price for a multiple order items - if they exist as part of a value menu" do
-        r.price("burger", "fries", "drink").should == 5.00
-      end
-    end
-
-    context "finding the minimum price" do
-      it "first runs all items against all the menu items and returns the relevant matches" do
-        r.should_receive(:relevant_matches).with(r.line_items.to_a, ["burger", "drink"]).and_return({})
-        r.price("burger", "drink")
-      end
-
-      it "matches as greedily as possible" do
-        r.price("burger", "fries").should == 5.00
-      end
-
-      it "finds the least expensive combination by building relevant search trees when there are overlapping combinations of items in the menu " do
-        r = Restaurant.new(1, 2.50, "burger")
-        r.add_items(2.00, "fries")
-        r.add_items(5.00, "burger", "fries", "drink")
-        r.price("burger", "fries").should == 4.50
-      end
-
-      context "tree pruning" do
-        it "stops aggregating individual prices if the sum of individual item prices found is greater than or equal to the minimum price_combination found" do
-          r = Restaurant.new(1, 4.50, "burger", "fries")
-          r.add_items(3.00, "burger", "drink")
-          r.add_items(5.00, "bourbon")
-          r.add_items(5.00, "burger", "fries", "drink")
-          r.price("fries", "bourbon").should == 9.50
         end
       end
     end

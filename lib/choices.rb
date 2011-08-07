@@ -23,6 +23,8 @@ class Choices
       restaurant_id, restaurant = array
       result[restaurant_id] = restaurant.price(*items)
       result
-    }.select{|k,v| !v.nil?}
+    }.select{|k,v| !v.nil?}.sort{|a,b| a.last <=> b.last}.first.join(", ")
   end
+
+
 end
