@@ -31,8 +31,7 @@ match against a menu item or its not.
 in common with the search array. Sort by the most "relevant" matches i.e. the largest intersection set
 (between menu and order items) comes first. This way, we have a better than average chance of coming up
 with the most optimal price first since value menus are cheaper than single item combinations.
-For example: If my menu is: (A, B, C ... are menu items for simplicity and the value on the right of
-the  -> is the price for each)
+For example: If my menu is: 
 A -> 1.00
 B -> 2.00
 C -> 3.00
