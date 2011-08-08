@@ -65,13 +65,12 @@ local variable called local_best_combination.
     -- If an exact match is found, return the relevant menu item candidate that matched.
     -- For each of the remaining order items, find and return the best price combination recursively.
     -- load the returned price into local_best_combination so that it accumulates the prices for 
-each combination.
-* Using the example above, this means:
+each combination. Using the example above, this means:
 The intersection of my first relevant match (A, B, D -> 5.00) against my order (A, B, C, D) is:
 {A,B}. So now my local_best_combination = {A, B, D -> 5.00}. And my remaining items to lookup are C and D. 
 Also, since I have now have A,B,D as part of my solution, I don't have to look it up again (for this 
 combination). That means I can safely remove it from my list of candidates to search against when
-I recurse. I call the same method but with Relevant matches (see line 44) less {A,B,D}. Also, I only need 
+I recurse. I call the same method but with Relevant matches (see line 43) less {A,B,D}. Also, I only need 
 to look up C, E, so I only send those two along. And I send the best price along. 
  ** First Recursion level: Conduct a relevancy search by using these two: 
     Menu items:
@@ -89,24 +88,25 @@ to look up C, E, so I only send those two along. And I send the best price along
     E -> 4.00
     Since our base price is still 1,000,000, we are free to proceed further.
     Now our local_best_combination will have A,C in it with and will recurse internally with E. Since E
-is a perfect match, it will return right away from the inner recursion and our local_best_combination
-will look like this: {A,C -> 3.00, E -> 4.00}. The total cost of purchasing C, E is thus 7.00 which is 
-less than 1,000,000 and the best price is thus updated to this value.
+    is a perfect match, it will return right away from the inner recursion and our local_best_combination
+    will look like this: {A,C -> 3.00, E -> 4.00}. The total cost of purchasing C, E is thus 7.00 which is 
+    less than 1,000,000 and the best price is thus updated to this value.
     Now we iterate through B,C to see if this combination is a better match for {C,E} than the previou
-one A,C. And so on until we're done with all the levels at C.
-Thus we find the lowest possible price for the C, E combination and then return that up to the first 
-level when the recursion is done. 
+    one A,C. And so on until we're done with all the levels at C.
+    Thus we find the lowest possible price for the C, E combination and then return that up to the first 
+    level and continue similarly when the recursion is done. 
 
 ####################################################################################################
 # Complexity
 ####################################################################################################
 Keeping the above example in mind, the complexity of this approach could be broken down as follows:
 ** Complexity of finding the best price for {A, B} + complexity of finding the best price for {C,E}
-Given the above example (see lines 85-90): the complexity of finding the best price for C,E would be
+Given the above example (see lines 85-87): the complexity of finding the best price for C,E would be
 3*1 = 3 iterations for C times 1 for E (since we return E right away because it is an exact match).
 The complexity of finding {A,B} would be 1 (since there is only 1 menu item that matches A,B).
 ** The above step would be repeated for each iteration against the outermost relevant match.
-** Thus the complexity is less than factorial but definitely better than computing all combinations.
+** Thus the number of computations will still be worse than polynomail but far less than factorial
+and has a much better chance of scaling for large datasets (or menus with lost of item combinations).
 ** It is also worth noting that this algorithm uses a "pruning" approach. That means, if the best price
 is less than the price of the candidate item being compared, then the iteration is skipped i.e.
 there is already a better price match, in place, so iterating through the candidate in question 
@@ -127,5 +127,6 @@ computations. Clearly this approach will not scale for large datasets.
 1. Concise: ruby lets me express myself with as little code as possible. As a case in point consider: 
 @line_items.keys.flatten.uniq.sort (restaurant#has_items?)
 2. IRB - since it's interpreter-based, I can test as much or as little of my code right away.
-3. Dynamic class loading - if I want to add a method to a class, I can simply extend it and add the method I want.
+3. Dynamic class loading - if I want to add a method to a class, I can simply extend it and add the 
+method I want.
 4. Easy to use testing framework.
