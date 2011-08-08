@@ -92,26 +92,26 @@ describe Choices do
     end
 
     it "finds the most optimal price given a single item " do
-      choices.best_match("burger").should == "1, 3.0"
+      choices.best_match(["burger"]).should == "1, 3.0"
     end
 
     it "finds the most optimal price given a single item even if it exists as part of a value item menu" do
       choices.add_items(3, 6.00, "burger", "shake", "fries")
-      choices.best_match("fries").should == "1, 1.5"
+      choices.best_match(["fries"]).should == "1, 1.5"
     end
 
     it "finds the most optimal price given multiple items" do
-      choices.best_match("burger", "fries").should == "2, 4.25"
+      choices.best_match(["burger", "fries"]).should == "2, 4.25"
     end
 
     it "finds the most optimal price given single and value items" do
       choices.add_items(3, 2.50, "burger")
       choices.add_items(3, 6.00, "burger", "shake", "fries")
-      choices.best_match("burger", "shake", "fries").should == "3, 6.0"
+      choices.best_match(["burger", "shake", "fries"]).should == "3, 6.0"
     end
 
     it "returns a nice error message if there's no match" do
-      choices.best_match("boo").should == "Sorry, no match found for boo"
+      choices.best_match(["boo"]).should == "Sorry, no match found for boo"
     end
   end
 end

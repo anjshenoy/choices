@@ -20,14 +20,14 @@ class Restaurant
     @line_items[items.sort] = price
   end
 
-  def has_items?(*items)
+  def has_items?(items)
     items.sort!
     (@line_items.keys.flatten.uniq.sort & items) == items
   end
 
-  def price(*items)
+  def price(items)
     items.sort!
-    return nil unless self.has_items?(*items)
+    return nil unless self.has_items?(items)
     @line_items[items] || find_best_price(@line_items.to_a, items).collect(&:last).inject(&:+)
   end
 

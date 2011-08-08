@@ -55,30 +55,30 @@ describe Restaurant do
       let(:r) {Restaurant.new(1, 1.75, "fries")}
 
       it "returns true if it has a particular item" do
-        r.has_items?("fries").should be_true
+        r.has_items?(["fries"]).should be_true
       end
 
       it "returns true only if all supplied items exist in its menu" do
-        r.has_items?("fries", "burger").should be_false
+        r.has_items?(["fries", "burger"]).should be_false
       end
     end
     context "against value items list" do
       let(:r) { Restaurant.new(1, 5, "burger", "fries", "drink") }
       it "returns true if it has a particular item" do
-        r.has_items?("fries").should be_true
+        r.has_items?(["fries"]).should be_true
       end
 
       it "returns true if all supplied items exist in its menu" do
-        r.has_items?("fries", "burger").should be_true
+        r.has_items?(["fries", "burger"]).should be_true
       end
 
       it "returns false if even one item out of the list of supplied items does not exist in its menu" do
-        r.has_items?("fries", "burger", "boo").should be_false
+        r.has_items?(["fries", "burger", "boo"]).should be_false
       end
 
       it "returns true for multi-word items" do
         r.add_items(4.00, "burger", "fries", "coleslaw_with_sweet_mayo")
-        r.has_items?("coleslaw_with_sweet_mayo").should be_true
+        r.has_items?(["coleslaw_with_sweet_mayo"]).should be_true
       end
     end
   end
@@ -87,16 +87,16 @@ describe Restaurant do
     let(:r) { Restaurant.new(1, 5.00, "burger", "fries", "drink") }
 
     it "returns nil if the order item does not exist in its menu" do
-      r.price("boo").should be_nil
+      r.price(["boo"]).should be_nil
     end
 
     context "if an exact match is found" do
       it "does not look for the best price by searching through menu item combinations" do
         r.should_not_receive(:find_best_price)
-        r.price("burger", "fries", "drink")
+        r.price(["burger", "fries", "drink"])
       end
       it "returns the price right away" do
-        r.price("burger", "fries", "drink").should == 5.00
+        r.price(["burger", "fries", "drink"]).should == 5.00
       end
     end
 
@@ -111,16 +111,16 @@ describe Restaurant do
           r.should_receive(:relevant_matches).
             with(r.line_items.to_a, ["burger"]).
             and_return([[["burger", "fries", "drink"], 5.00], [["burger", "fries"], 3.00]])
-          r.price("burger")
+          r.price(["burger"])
         end
         it "finds the best price by running the order item against the list of relevant items" do
-          r.price("burger").should == 3.00
+          r.price(["burger"]).should == 3.00
         end
       end
 
       context "if there are multiple order items and there is no exact match" do
         it "scans the menu recursively for relevant matches to find the lowest price" do
-          r.price("burger", "soda").should == 5.00
+          r.price(["burger", "soda"]).should == 5.00
         end
       end
     end

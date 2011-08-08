@@ -20,11 +20,10 @@ class Choices
     end
   end
 
-  #TODO :test for empty items
-  def best_match(*items)
+  def best_match(items)
     result = @restaurants.inject({}){|result, array|
       restaurant_id, restaurant = array
-      result[restaurant_id] = restaurant.price(*items)
+      result[restaurant_id] = restaurant.price(items)
       result
     }.select{|k,v| !v.nil?}.sort{|a,b| a.last <=> b.last}.first
     result.nil? ? "Sorry, no match found for #{items.join(", ")}" : result.join(", ")
