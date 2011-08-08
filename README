@@ -1,0 +1,132 @@
+####################################################################################################
+#  This application was run using:
+####################################################################################################
+1. ruby 1.9.2
+2. Gems used: rspec2. Installing the rspec gem (version 2.6.4) is required if you want to run tests. 
+If you have RVM (see https://rvm.beginrescueend.com) and the bundler gem installed, run "bundle install" 
+from the command line. Otherwise just run "gem install rspec" from the command line.
+3. To run tests simply type "rake" at the command line.
+4. To run the app type "ruby jurgensville.rb path/to/data-file item-to-search1 item-to-search2 (and so on)" 
+at the command line.
+Note: I added a .rvmrc file to create a choices gemset against the ruby 1.9.2 version - so it 
+doesn't intefere with any existing gemsets. This will also install bundler and use bundler to install
+rspec2. If you don't have rvm, it should not intefere with running the app or tests.
+
+####################################################################################################
+# Approach used:
+####################################################################################################
+The solution uses the following approach:
+1. Load the datafile: load all restaurants and the menu information for each and set up each 
+restaurant.
+2. Search: Apply the order items from the command line iteratively through each restaurant
+3. For each restaurant, first check if all the order items exist as part of the menu. If not, return 
+nil.
+4. If the items do exist: there are two possibilities - either the order item combination is an exact
+match against a menu item or its not.
+5. If it is an exact match against a menu item, return the  menu item's value.
+6. Othewise conduct a "relevancy search"
+
+** Relevancy search is conducted as follows:
+- Scan the menu and build an initial list of menu items such that each menu item has at least one element
+in common with the search array. Sort by the most "relevant" matches i.e. the largest intersection set
+(between menu and order items) comes first. This way, we have a better than average chance of coming up
+with the most optimal price first since value menus are cheaper than single item combinations.
+For example: If my menu is: (A, B, C ... are menu items for simplicity and the value on the right of
+the  -> is the price for each)
+A -> 1.00
+B -> 2.00
+C -> 3.00
+E -> 4.00
+A, B, D -> 5.00
+A, C -> 3.00
+B,C -> 4.00
+F, G -> 7.00
+Then my relevancy match for an order of A,B,C,E would be (in this order)
+A, B, D -> 5.00
+A, C -> 3.00
+B,C -> 4.00
+A -> 1.00
+B -> 2.00
+C -> 3.00
+E -> 4.00
+
+* Set up an outer variable called price_combinations -- this will hold the menu item combination with
+the least price.
+* Set up a best price of 1,000,000 - this would be the most I would be willing to spend on any set of
+order items. Since the town of Jurgensville is not doing too well financially, it would be hard to 
+imagine the total cost of all menu items (in the event that someone does order every single menu item) 
+would be greater than this number. When a combination price is found that is less than this number, 
+we replace the best price with the lesser value. When this happens, we also update the price_combinations
+with the new menu item combination.
+* For each item (candidate) in the relevancy list, do the following:
+    -- check if the candidate's price is less than the best price. If it is proceed, otherwise return
+an empty [] to indicate nothing suitable was found.
+    -- Run an intersection between the relevant menu item and the order item and store the result in a
+local variable called local_best_combination. 
+    -- If an exact match is found, return the relevant menu item candidate that matched.
+    -- For each of the remaining order items, find and return the best price combination recursively.
+    -- load the returned price into local_best_combination so that it accumulates the prices for 
+each combination.
+* Using the example above, this means:
+The intersection of my first relevant match (A, B, D -> 5.00) against my order (A, B, C, D) is:
+{A,B}. So now my local_best_combination = {A, B, D -> 5.00}. And my remaining items to lookup are C and D. 
+Also, since I have now have A,B,D as part of my solution, I don't have to look it up again (for this 
+combination). That means I can safely remove it from my list of candidates to search against when
+I recurse. I call the same method but with Relevant matches (see line 44) less {A,B,D}. Also, I only need 
+to look up C, E, so I only send those two along. And I send the best price along. 
+ ** First Recursion level: Conduct a relevancy search by using these two: 
+    Menu items:
+    A, C -> 3.00
+    B,C -> 4.00
+    A -> 1.00
+    B -> 2.00
+    C -> 3.00
+    E -> 4.00
+    And an order item list of C, E. That means my relevant search will return only those items that match
+    (C, E):
+    A, C -> 3.00
+    B,C -> 4.00
+    C -> 3.00
+    E -> 4.00
+    Since our base price is still 1,000,000, we are free to proceed further.
+    Now our local_best_combination will have A,C in it with and will recurse internally with E. Since E
+is a perfect match, it will return right away from the inner recursion and our local_best_combination
+will look like this: {A,C -> 3.00, E -> 4.00}. The total cost of purchasing C, E is thus 7.00 which is 
+less than 1,000,000 and the best price is thus updated to this value.
+    Now we iterate through B,C to see if this combination is a better match for {C,E} than the previou
+one A,C. And so on until we're done with all the levels at C.
+Thus we find the lowest possible price for the C, E combination and then return that up to the first 
+level when the recursion is done. 
+
+####################################################################################################
+# Complexity
+####################################################################################################
+Keeping the above example in mind, the complexity of this approach could be broken down as follows:
+** Complexity of finding the best price for {A, B} + complexity of finding the best price for {C,E}
+Given the above example (see lines 85-90): the complexity of finding the best price for C,E would be
+3*1 = 3 iterations for C times 1 for E (since we return E right away because it is an exact match).
+The complexity of finding {A,B} would be 1 (since there is only 1 menu item that matches A,B).
+** The above step would be repeated for each iteration against the outermost relevant match.
+** Thus the complexity is less than factorial but definitely better than computing all combinations.
+** It is also worth noting that this algorithm uses a "pruning" approach. That means, if the best price
+is less than the price of the candidate item being compared, then the iteration is skipped i.e.
+there is already a better price match, in place, so iterating through the candidate in question 
+is clearly not worth a shot.
+
+####################################################################################################
+# Initial approach used:
+####################################################################################################
+The first approach used was to store all possible combinations of menu items so that when search items
+were supplied, the cost of searching would be a simple lookup. The problem with this approach is
+that the number of combinations starts to explode by an order of factorial with the size of the dataset.
+For example, computing all combinations for 15 menu items would be 15! or 1 trillion
+computations. Clearly this approach will not scale for large datasets.
+
+####################################################################################################
+# Language of choice: ruby. Why?
+####################################################################################################
+1. Concise: ruby lets me express myself with as little code as possible. As a case in point consider: 
+@line_items.keys.flatten.uniq.sort (restaurant#has_items?)
+2. IRB - since it's interpreter-based, I can test as much or as little of my code right away.
+3. Dynamic class loading - if I want to add a method to a class, I can simply extend it and add the method I want.
+4. Easy to use testing framework.
