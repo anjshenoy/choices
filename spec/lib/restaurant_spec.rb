@@ -146,6 +146,14 @@ describe Restaurant do
             r.add_items(2.00, "fries")
             r.price(["burger", "fries", "fries"]).should == 5.00
           end
+          it "when the single line items are cheaper than the value items" do
+            r.add_items(5.00, "fajitas", "salsa")
+            r.add_items(1.00, "salsa")
+            r.add_items(3.00, "fajitas")
+            r.add_items(1.50, "burger")
+            r.add_items(1.00, "fries")
+            r.price(["burger", "fries", "fajitas", "salsa"]).should == 6.5
+          end
         end
       end
 
