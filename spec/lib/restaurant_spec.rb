@@ -80,6 +80,13 @@ describe Restaurant do
         r.add_items(4.00, "burger", "fries", "coleslaw_with_sweet_mayo")
         r.has_items?(["coleslaw_with_sweet_mayo"]).should be_true
       end
+
+      it "returns true if the item is listed more than once" do
+        r.has_items?(["fries"]*2).should be_true
+      end
+      it "returns true if a combination of items is listed more than once" do
+        r.has_items?(["burger"] + ["fries"]*2).should be_true
+      end
     end
   end
 
@@ -110,19 +117,14 @@ describe Restaurant do
         it "a set of items that have at least one menu element in common between menu items and order items" do
           r.should_receive(:relevant_matches).
             with(r.line_items.to_a, ["burger"]).
-            and_return([[["burger", "fries", "drink"], 5.00], [["burger", "fries"], 3.00]])
+            and_return([[["burger", "fries"], 3.00]])
           r.price(["burger"])
         end
         it "finds the best price by running the order item against the list of relevant items" do
           r.price(["burger"]).should == 3.00
         end
       end
-
-      context "if there are multiple order items and there is no exact match" do
-        it "scans the menu recursively for relevant matches to find the lowest price" do
-          r.price(["burger", "soda"]).should == 5.00
-        end
-      end
     end
   end
 end
+

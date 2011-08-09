@@ -21,7 +21,7 @@ class Restaurant
   end
 
   def has_items?(items)
-    items.sort!
+    items = items.uniq.sort
     (@line_items.keys.flatten.uniq.sort & items) == items
   end
 
@@ -41,10 +41,9 @@ class Restaurant
           return [candidate]
         end
         local_best_combination = [candidate]
-        matched_items = candidate.first & order_items
-        remaining_items = order_items - matched_items
+        remaining_items = remaining_order_items(order_items, candidate.first & order_items)
         if remaining_items.size > 0
-          remaining_menu_item_combo_price = find_best_price(menu_items - candidate, remaining_items, best_price_so_far)
+          remaining_menu_item_combo_price = find_best_price(menu_items, remaining_items, best_price_so_far)
           unless remaining_menu_item_combo_price.nil?
             local_best_combination += remaining_menu_item_combo_price
           end
@@ -58,9 +57,29 @@ class Restaurant
     price_combinations
   end
 
+  # Find all menu items who's set intersection with order items is at least one
+  # Sort the result first by the size of items and then by price in ascending order
+  # Thus the possibility of finding the lowest price first is maximized.
+  # Then remove items that have the same intersecting elements with order items but
+  # retain the one with the lowest price for this case. For example with:
+  # [[["burger", "fries"], 3.0], [["burger", "drink", "fries"], 5.0]]
+  # for an order set of ["burger"] we only need the first one as that is the best
+  # price match for burger from all line items that intersect with burger
   def relevant_matches(menu_items, order_items)
     menu_items.select{|keys, price|
       (keys & order_items).size > 0
-    }.sort{|a,b| b.first.size <=> a.first.size}
+    }.sort{|a,b| b.first.size <=> a.first.size && a.last <=> b.last}.inject([]){|array, menu_item|
+      if array.empty? || !(menu_item.first & order_items == array.last.first & order_items && menu_item.last > array.last.last)
+        array << menu_item
+      end
+      array
+    }
+  end
+
+  def remaining_order_items(order_items, matched_items)
+    matched_items.each do |m_i|
+      order_items.delete_at(order_items.find_index{|o| o == m_i})
+    end
+    order_items
   end
 end
