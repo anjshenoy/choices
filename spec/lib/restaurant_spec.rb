@@ -98,32 +98,57 @@ describe Restaurant do
     end
 
     context "if an exact match is found" do
+      it "returns the price right away" do
+        r.price(["burger", "fries", "drink"]).should == 5.00
+      end
       it "does not look for the best price by searching through menu item combinations" do
         r.should_not_receive(:find_best_price)
         r.price(["burger", "fries", "drink"])
       end
-      it "returns the price right away" do
-        r.price(["burger", "fries", "drink"]).should == 5.00
-      end
     end
 
     context "if an exact match is not found" do
+      let(:r) { Restaurant.new(1, 5.00, "burger", "fries", "drink") }
       before(:each) do
         r.add_items(5.00, "bourbon")
         r.add_items(2.00, "soda")
         r.add_items(3.00, "burger", "fries")
       end
-      context "first build relevant matches" do
-        it "a set of items that have at least one menu element in common between menu items and order items" do
-          r.should_receive(:relevant_matches).
-            with(r.line_items.to_a, ["burger"]).
-            and_return([[["burger", "fries"], 3.00]])
-          r.price(["burger"])
+      it "a set of items that have at least one menu element in common between menu items and order items" do
+        r.should_receive(:relevant_matches).
+          with(r.line_items.to_a, ["burger"]).
+          and_return([[["burger", "fries"], 3.00]])
+        r.price(["burger"])
+      end
+
+      context "always find the lowest price" do
+        it "for a single item" do
+          r.price(["soda"]).should == 2.00
         end
-        it "finds the best price by running the order item against the list of relevant items" do
-          r.price(["burger"]).should == 3.00
+        it "for multiple single items" do
+          r.price(["soda", "bourbon"]).should == 7.00
+        end
+        context "for multiple items" do
+          it "when the items are included in a single value menu" do
+            r.price(["burger", "fries"]).should == 3.00
+          end
+          it "when the items are included as part of multiple value menus" do
+            r.add_items(5.00, "fajitas", "salsa")
+            r.price(["burger", "fries", "fajitas", "salsa"]).should == 8.00
+          end
+          it "when the items are included as part of multiple single and value menus" do
+            r.add_items(5.00, "fajitas", "salsa")
+            r.add_items(2.00, "salsa")
+            r.add_items(4.00, "fajitas")
+            r.price(["burger", "fries", "fajitas", "salsa", "soda", "bourbon"]).should == 15.00
+          end
+          it "when the items are listed more than once" do
+            r.add_items(2.00, "fries")
+            r.price(["burger", "fries", "fries"]).should == 5.00
+          end
         end
       end
+
     end
   end
 end
