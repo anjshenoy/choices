@@ -41,7 +41,7 @@ class Restaurant
           return [candidate]
         end
         local_best_combination = [candidate]
-        remaining_items = remaining_order_items(order_items, candidate.first & order_items)
+        remaining_items = remaining_order_items(order_items.clone, candidate.first & order_items)
         if remaining_items.size > 0
           remaining_menu_item_combo_price = find_best_price(menu_items, remaining_items, best_price_so_far)
           unless remaining_menu_item_combo_price.nil?
@@ -76,6 +76,9 @@ class Restaurant
     }
   end
 
+  # The order items in the first argument are actually a clone
+  # of the original order_items and deleting this list will
+  # therefore not affect the original one.
   def remaining_order_items(order_items, matched_items)
     matched_items.each do |m_i|
       order_items.delete_at(order_items.find_index{|o| o == m_i})
