@@ -70,8 +70,10 @@ class Restaurant
     hash = menu_items.inject({}){|result, menu_item|
       intersection_set = menu_item.first & order_items
       unless intersection_set.empty?
-        if result.has_key?(intersection_set) && menu_item.last < result[intersection_set].last
-          result[intersection_set] = menu_item
+        if result.has_key?(intersection_set) 
+          if menu_item.last < result[intersection_set].last
+            result[intersection_set] = menu_item
+          end
         else
           result[intersection_set] = menu_item
         end
