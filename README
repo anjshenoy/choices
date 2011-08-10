@@ -6,8 +6,8 @@
 If you have RVM (see https://rvm.beginrescueend.com) and the bundler gem installed, run "bundle install" 
 from the command line. Otherwise just run "gem install rspec" from the command line.
 3. To run tests simply type "rake" at the command line.
-4. To run the app type "ruby jurgensville.rb path/to/data-file item-to-search1 item-to-search2 (and so on)" 
-at the command line.
+4. To run the app type "ruby jurgensville.rb path/to/data-file item1 item2 (and so on)" at the command 
+line.
 5. There is also a config file under config using which this app can be run.
 Note: I added a .rvmrc file to create a choices gemset against the ruby 1.9.2 version - so it 
 doesn't intefere with any existing gemsets. This will also install bundler and use bundler to install
@@ -36,12 +36,12 @@ nil.
 4. Find all line items that have at least one item in common with the order set. 
 5. Iterate through each of these line items and find the lowest price for the rest of the order
 i.e. (order - line item) by applying step #4 recursively.
-6. At each iteration level note the lowest price. Stop searching if the price of the current 
-iteration is greater than or equal to the price of the previous iteration.
+6. Within a recursion, check if the amount of funds available is greater than or equal to the candidate's
+cost. If yes, continue otherwise, move on to the next candidate in the list.
 
 Steps 4,5 and 6 are implemented using the "branch and bound" pattern. The "branch" step is steps 
-#4,5 where we build branches based on the order items matching the line items. The "bound" step is 
-step #6 where a price comparison stops us from moving further along a new branch.
+4,5 where we build branches based on the order items matching the line items. The "bound" step is 
+step 6 where a price comparison stops us from moving further along a new branch.
 
 ####################################################################################################
 # Complexity

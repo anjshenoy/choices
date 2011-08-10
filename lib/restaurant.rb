@@ -35,12 +35,18 @@ class Restaurant
   def find_best_price(menu_items, order_items, money_left = 1000000)
     price_combinations = []
     relevant_matches(menu_items, order_items).each do |candidate|
+
+      # prune the search by check if enough money is left to meet this candidate's price
       if candidate.last < money_left
         if candidate.first == order_items
           return [candidate]
         end
+
         remaining_items = remaining_order_items(order_items.clone, candidate.first & order_items)
         if remaining_items.size > 0
+
+          # subtract candidate's price from the money left, 
+          # which is the amount available to satisfy the rest of the order
           remaining_menu_item_combo_price = find_best_price(menu_items, remaining_items, money_left-candidate.last)
           unless remaining_menu_item_combo_price.empty?
             price_combinations = [candidate] + remaining_menu_item_combo_price
@@ -49,6 +55,7 @@ class Restaurant
         end
       end
     end
+
     price_combinations
   end
 
