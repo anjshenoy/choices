@@ -2,7 +2,7 @@
 #  This application was run using:
 ####################################################################################################
 1. ruby 1.9.2
-2. Gems used: rspec2. Installing the rspec gem (version 2.6.4) is required if you want to run tests. 
+2. Gems used: rspec2. Installing the rspec gem (version 2.6.0) is required if you want to run tests. 
 If you have RVM (see https://rvm.beginrescueend.com) and the bundler gem installed, run "bundle install" 
 from the command line. Otherwise just run "gem install rspec" from the command line.
 3. To run tests simply type "rake" at the command line.
