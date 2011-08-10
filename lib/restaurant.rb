@@ -32,26 +32,21 @@ class Restaurant
   end
 
   private
-  def find_best_price(menu_items, order_items, best_price_so_far = 1000000)
-    price_combinations =[] 
-    local_best_combination = []
+  def find_best_price(menu_items, order_items, money_left = 1000000)
+    price_combinations = []
     relevant_matches(menu_items, order_items).each do |candidate|
-      if candidate.last < best_price_so_far
+      if candidate.last < money_left
         if candidate.first == order_items
           return [candidate]
         end
-        local_best_combination = [candidate]
         remaining_items = remaining_order_items(order_items.clone, candidate.first & order_items)
         if remaining_items.size > 0
-          remaining_menu_item_combo_price = find_best_price(menu_items, remaining_items, best_price_so_far)
-          unless remaining_menu_item_combo_price.nil?
-            local_best_combination += remaining_menu_item_combo_price
+          remaining_menu_item_combo_price = find_best_price(menu_items, remaining_items, money_left-candidate.last)
+          unless remaining_menu_item_combo_price.empty?
+            price_combinations = [candidate] + remaining_menu_item_combo_price
+            money_left = price_combinations.collect(&:last).inject(&:+)
           end
         end
-        best_price_so_far = local_best_combination.collect(&:last).inject(&:+)
-      end
-      if price_combinations.empty? || price_combinations.collect(&:last).inject(&:+) > best_price_so_far
-        price_combinations = local_best_combination
       end
     end
     price_combinations
@@ -61,13 +56,12 @@ class Restaurant
   # Load the intersection as a hash key with the menu_item as the value.
   # If another menu_item comes along matching the same intersection (i.e. key)
   # with a lesser price, replace the hash value, otherwise move on.
-  # Sort the result by the highest intersecting set first
-  # Thus the possibility of finding the lowest price first is maximized.
-  # For example with: [[["burger", "fries"], 3.0], [["burger", "drink", "fries"], 5.0]]
-  # for an order set of ["burger"] we only need the first one as that is the best
-  # price match for burger from all menu items that intersect with burger
+  # The result is sorted by the intersecting set size in descending order. 
+  # If two intersecting sets have the same size, the one with the lower price
+  # takes predence. Thus the possibility of finding the lowest price first 
+  # is maximized. 
   def relevant_matches(menu_items, order_items)
-    hash = menu_items.inject({}){|result, menu_item|
+    menu_items.inject({}){|result, menu_item|
       intersection_set = menu_item.first & order_items
       unless intersection_set.empty?
         if result.has_key?(intersection_set) 
@@ -79,7 +73,13 @@ class Restaurant
         end
       end
       result
-    }.sort{|a,b| b.last.first.size <=> a.last.first.size}.collect(&:last)
+    }.sort{|a,b| 
+      if b.first.size == a.first.size
+        a.last.last <=> b.last.last
+      else
+        b.first.size <=> a.first.size
+      end
+    }.collect(&:last)
   end
 
   # The order items in the first argument are actually a clone
