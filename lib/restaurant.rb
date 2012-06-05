@@ -18,6 +18,7 @@ class Restaurant
       raise ArgumentError.new("Data Error:: Price is invalid for restaurant ID:#{@id} and is required in order to proceed")
     end
     @line_items[items.sort] = price
+    # puts "RID: #{id}: #{@line_items.inspect}"
   end
 
   def has_items?(items)
@@ -35,10 +36,9 @@ class Restaurant
   def find_best_price(menu_items, order_items, money_left = 1000000)
     price_combinations = []
     relevant_matches(menu_items, order_items).each do |candidate|
-
       # prune the search by check if enough money is left to meet this candidate's price
       if candidate.last < money_left
-        if candidate.first == order_items
+        if candidate.first == order_items || (candidate.first & order_items == order_items)
           return [candidate]
         end
 

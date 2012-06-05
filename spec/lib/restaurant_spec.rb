@@ -154,6 +154,23 @@ describe Restaurant do
             r.add_items(1.00, "fries")
             r.price(["burger", "fries", "fajitas", "salsa"]).should == 6.5
           end
+
+          context "for subsets" do
+            it "of a value item" do
+              r.add_items(5.00, "fajitas", "salsa")
+              r.price(["fajitas"]).should == 5.00
+            end
+
+            it "works for combinations of subsets" do
+              r.add_items(5.00, "fajitas", "salsa")
+              r.price(["fries", "fajitas"]).should == 8.00
+            end
+
+            it "works with a full set and a subset" do
+              r.add_items(5.00, "fajitas", "salsa")
+              r.price(["burger", "fries", "fajitas"]).should == 8.00
+            end
+          end
         end
       end
 
